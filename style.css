@@ -16,6 +16,9 @@
   --slate-300: #cbd5e1;
   --slate-400: #94a3b8;
   --stale-500: #64748b;
+
+  --inner-shadow: inset #1d1c1c6b 0px 5px 15px;
+  --outer-shadow: 2px 4px 8px 1px rgba(41, 27, 16, 0.226);
   }
 body{
   padding-top: 2rem;
@@ -28,11 +31,11 @@ body{
   min-width: 50rem;
   height: 70rem;
   background-color: var(--slate-200);
-  border: 2px solid black;
+  box-shadow: var(--outer-shadow);
   border-radius: 1rem;
-  justify-content: center;
+  justify-content: flex-end;
   align-items: center;
-  gap: 8rem
+  gap: 4rem
 }
 .wrapper{
   flex: 1;
@@ -208,7 +211,8 @@ button:active{
 
 
 .footer{
-  background-color: red;
+  color: white;
+  background-color: var(--stale-500);
   width: 100%;
   height: 7rem;
   border-bottom-left-radius: 0.7rem;
@@ -217,4 +221,9 @@ button:active{
   font-size: 2rem;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+}
+.footer:hover{
+  -color: black;
+  background-color: var(--slate-400);
 }

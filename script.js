@@ -9,7 +9,6 @@ const displayController = (function () {
   const cells = document.querySelectorAll("[data-cell]");
   const playfield = document.querySelector(".playfield");
   const endGameField = document.querySelector(".endgame");
-  const restartButton = document.getElementById("restart-button");
   const winningText = document.querySelector(".winning-text");
   function showEndgameMenu() {
     endGameField.classList.add("show");
@@ -27,6 +26,9 @@ const displayController = (function () {
   }
   //EVENT LISTENERS
   function restartHandler(handler) {
+    const restartButton = document.getElementById("restart-button");
+    const restartDiv = document.querySelector('.footer');
+    restartDiv.addEventListener('click', handler)
     restartButton.addEventListener("click", handler);
   }
 
