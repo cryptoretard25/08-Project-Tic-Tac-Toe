@@ -15,6 +15,10 @@
 <body>
   <div class="flex-container">
       <h1>Tic Tac Toe</h1>
+      <div class="interface">
+        <button class="interface-button button-active" id = 'x-button'>╳</button>
+        <button class="interface-button" id="o-button">◯</button>
+      </div>
       <div class="playfield">
         <div class="cell"><div class="mark" data-cell></div></div>
         <div class="cell"><div class="mark" data-cell></div></div>
@@ -29,9 +33,9 @@
    <div class="footer">Restart</div>
   </div>
   <div class="endgame">
-    <h2>Game over!</h2>
+    <h3>Game over!</h3>
     <div class="winning-text"></div>
-    <h3>Play again?</h3>
+    <h4>Play again?</h4>
     <button id="restart-button">Restart</button>
   </div>
 

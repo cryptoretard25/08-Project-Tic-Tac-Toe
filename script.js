@@ -10,6 +10,42 @@ const displayController = (function () {
   const playfield = document.querySelector(".playfield");
   const endGameField = document.querySelector(".endgame");
   const winningText = document.querySelector(".winning-text");
+  const setXButton = document.getElementById("x-button");
+  const setOButton = document.getElementById("o-button");
+  function setDefaultMark(){
+    setXButton.classList.add("button-active");
+    setOButton.classList.remove("button-active");
+  }
+  function activateMarkInterface() {
+    setXButton.disabled = false;
+    setOButton.disabled = false;
+    log("Mark interface enabled");
+    setXButton.addEventListener("click", function (e) {
+      if (!setXButton.classList.contains("button-active")) {
+        setXButton.classList.add("button-active");
+        setOButton.classList.remove("button-active");
+        gameRules.setMarkX();
+        hoverMark();
+        log("Setup X");
+      }
+    });
+    setOButton.addEventListener("click", function (e) {
+      if (!setOButton.classList.contains("button-active")) {
+        setOButton.classList.add("button-active");
+        setXButton.classList.remove("button-active");
+        gameRules.setMarkO();
+        hoverMark();
+        log("Setup O");
+      }
+    });
+  }
+  function deactivateMarkInterface() {
+    if (gameRules.gameStarted()) {
+      setXButton.disabled = true;
+      setOButton.disabled = true;
+      log("Mark interface disabled");
+    }
+  }
   function showEndgameMenu() {
     endGameField.classList.add("show");
   }
@@ -25,16 +61,17 @@ const displayController = (function () {
     winningText.textContent = `It's a draw!`;
   }
   //EVENT LISTENERS
-  function restartHandler(handler) {
+  function startHandler(func) {
     const restartButton = document.getElementById("restart-button");
-    const restartDiv = document.querySelector('.footer');
-    restartDiv.addEventListener('click', handler)
-    restartButton.addEventListener("click", handler);
+    const restartDiv = document.querySelector(".footer");
+    restartDiv.addEventListener("click", func);
+    restartButton.addEventListener("click", func);
   }
 
   function resetCells() {
     cells.forEach((cell) => {
       cell.addEventListener("click", _handleClick, { once: true });
+      cell.classList.remove("puff-in-center");
     });
   }
   function deactivateCells() {
@@ -47,7 +84,6 @@ const displayController = (function () {
   function _handleClick(e) {
     const cell = e.target;
     const currentMark = gameRules.getMark();
-    hoverMark(currentMark);
     _placeMark(cell, currentMark);
     gameRules.endGame();
     gameRules.nextRound();
@@ -59,16 +95,16 @@ const displayController = (function () {
     }
   }
   //HOVER HANDLER
-  function hoverMark(current) {
+  function hoverMark() {
     playfield.classList.remove(X.sign, O.sign);
-    current === O.sign
-      ? playfield.classList.add(X.sign)
-      : playfield.classList.add(O.sign);
+    playfield.classList.add(gameRules.getMark());
   }
 
   //internal functions
   function _placeMark(cell, current) {
     cell.classList.add(current);
+    cell.classList.add("puff-in-center");
+    displayController.deactivateMarkInterface();
   }
   return {
     cells,
@@ -77,17 +113,19 @@ const displayController = (function () {
     resetCells,
     deactivateCells,
     showEndgameMenu,
-    restartHandler,
+    startHandler,
     hideEndgameMenu,
     showWinningText,
     showDrawText,
+    activateMarkInterface,
+    deactivateMarkInterface,
+    setDefaultMark
   };
 })();
 //------------------------------------------------------------------------
 // MODULE: GAME RULES
 //------------------------------------------------------------------------
 const gameRules = (function () {
-  let _round;
   let _mark;
   const winningCombinations = [
     //HORIZONTAL
@@ -104,36 +142,49 @@ const gameRules = (function () {
   ];
   // GETTERS
   const getMark = () => _mark;
-  const getRound = () => _round;
   // METHODS
-  const restartGame = () => {
+  const setMarkX = () => _mark = X.sign;
+  const setMarkO = () => _mark = O.sign;
+  const gameStarted = () => {
+    const cells = [...displayController.cells];
+    const started = cells.some(
+      (cell) =>
+        cell.classList.contains(X.sign) || cell.classList.contains(O.sign)
+    );
+    return started;
+  };
+  const startGame = () => {
+    displayController.activateMarkInterface();
+    setMarkX();
+    displayController.setDefaultMark();
     displayController.hideEndgameMenu();
-    _round = 0;
-    _mark = X.sign;
     displayController.resetCells();
     displayController.clearDisplay();
-    displayController.hoverMark(O.sign);
+    displayController.hoverMark();
   };
   const nextRound = () => {
-    _round++;
-    _mark = _round % 2 === 0 ? X.sign : O.sign;
+    if (getMark() === X.sign) {
+      setMarkO();
+    } else {
+      setMarkX();
+    }
+    displayController.hoverMark();
   };
   const checkWin = () => {
     const currentMark = gameRules.getMark();
     return winningCombinations.some((combination) => {
-      return combination.every((index) => {
-        return displayController.cells[index].classList.contains(currentMark);
+      return combination.every((element) => {
+        return displayController.cells[element].classList.contains(currentMark);
       });
     });
   };
   const checkDraw = () => {
     const cells = [...displayController.cells];
-    const flag = cells.every(
+    const draw = cells.every(
       (element, index) =>
-        cells[index].classList.contains(O.sign) ||
-        cells[index].classList.contains(X.sign)
+        element.classList.contains(O.sign) || element.classList.contains(X.sign)
     );
-    if (!checkWin() && flag) return flag;
+    if (!checkWin() && draw) return draw;
   };
   const endGame = () => {
     if (checkWin()) {
@@ -147,10 +198,21 @@ const gameRules = (function () {
       displayController.showDrawText();
     }
   };
-  return { getMark, getRound, restartGame, nextRound, endGame, checkDraw };
+  return {
+    getMark,
+    startGame,
+    nextRound,
+    endGame,
+    checkDraw,
+    gameStarted,
+    setMarkX,
+    setMarkO,
+  };
 })();
-gameRules.restartGame();
-displayController.restartHandler(gameRules.restartGame);
+const onLoad = (function () {
+  gameRules.startGame();
+  displayController.startHandler(gameRules.startGame);
+})();
 //------------------------------------------------------------------------
 // FACTORY: PLAYER
 //------------------------------------------------------------------------

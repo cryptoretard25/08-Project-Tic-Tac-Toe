@@ -4,26 +4,30 @@
   box-sizing: border-box;
   list-style-type: none;
   text-decoration: none;
-  font-family: "Press Start 2P", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
-  Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-family: "Press Start 2P", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol";
 }
 
 :root {
   font-size: 62.5%;
   --cell-size: 15rem;
-  --mark-size: calc(var(--cell-size)*.8);
+  --mark-size: calc(var(--cell-size) * 0.8);
   --slate-200: #e2e8f0;
   --slate-300: #cbd5e1;
   --slate-400: #94a3b8;
   --stale-500: #64748b;
 
+  --white: white;
+
   --inner-shadow: inset #1d1c1c6b 0px 5px 15px;
   --outer-shadow: 2px 4px 8px 1px rgba(41, 27, 16, 0.226);
-  }
-body{
+}
+body {
   padding-top: 2rem;
 }
-.flex-container{
+.flex-container {
+  padding-top: 3rem;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -35,17 +39,17 @@ body{
   border-radius: 1rem;
   justify-content: flex-end;
   align-items: center;
-  gap: 4rem
+  gap: 4rem;
 }
-.wrapper{
+.wrapper {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3rem
+  gap: 3rem;
 }
-.playfield{
+.playfield {
   margin: 2rem 0 2rem 0;
   width: 45rem;
   height: 45rem;
@@ -55,62 +59,61 @@ body{
 }
 /* PLAYFIELD HOVER X*/
 .mark.x::before,
-.mark.x::after{
+.mark.x::after {
   background-color: black;
 }
 
-.playfield.x>.cell>.mark:not(.x):not(.o):hover::before,
-.playfield.x>.cell>.mark:not(.x):not(.o):hover::after{
+.playfield.x > .cell > .mark:not(.x):not(.o):hover::before,
+.playfield.x > .cell > .mark:not(.x):not(.o):hover::after {
   background-color: var(--slate-400);
 }
 
 /* PLAYFIELD HOVER O*/
-.mark.o::before{
+.mark.o::before {
   background-color: black;
 }
-.mark.o::after{
+.mark.o::after {
   background-color: var(--slate-200);
 }
-.playfield.o>.cell>.mark:not(.x):not(.o):hover::before{
+.playfield.o > .cell > .mark:not(.x):not(.o):hover::before {
   background-color: var(--slate-400);
 }
-.playfield.o>.cell>.mark:not(.x):not(.o):hover::after{
+.playfield.o > .cell > .mark:not(.x):not(.o):hover::after {
   background-color: var(--slate-200);
 }
 
 /* ********************************************************************************************** */
-.cell{
+.cell {
   font-size: 11rem;
   border: 1px solid grey;
   display: flex;
   justify-content: center;
   align-items: center;
-  
 }
-.cell>.mark.x,
-.cell>.mark.o{
+.cell > .mark.x,
+.cell > .mark.o {
   cursor: not-allowed;
 }
 /* CELL GRID */
 .cell:nth-child(1),
 .cell:nth-child(2),
-.cell:nth-child(3){
+.cell:nth-child(3) {
   border-top: none;
 }
-.cell:nth-child(3n + 1){
+.cell:nth-child(3n + 1) {
   border-left: none;
 }
-.cell:nth-child(3n+3){
+.cell:nth-child(3n + 3) {
   border-right: none;
 }
 
 .cell:nth-child(7),
 .cell:nth-child(8),
-.cell:nth-child(9){
+.cell:nth-child(9) {
   border-bottom: none;
 }
 
-.mark{
+.mark {
   width: 100%;
   height: 100%;
   display: flex;
@@ -118,7 +121,6 @@ body{
   align-items: center;
   position: relative;
   cursor: pointer;
-  
 }
 
 /* X mark */
@@ -128,20 +130,20 @@ body{
 /* not(.x) when .mark class is not contains X */
 /* not(.x) when .mark class is not contains O */
 .playfield.x>.cell>.mark:not(.x):not(.o):hover::before,
-.playfield.x>.cell>.mark:not(.x):not(.o):hover::after{
+.playfield.x>.cell>.mark:not(.x):not(.o):hover::after {
   position: absolute;
-  content: '';
-  width: calc(var(--mark-size)*.15);
+  content: "";
+  width: calc(var(--mark-size) * 0.15);
   height: var(--mark-size);
 }
 .mark.x::before,
 /* HOVER x EFFECT */
-.playfield.x>.cell>.mark:not(.x):not(.o):hover::before{
+.playfield.x>.cell>.mark:not(.x):not(.o):hover::before {
   transform: rotate(45deg);
 }
 .mark.x::after,
 /* HOVER x EFFECT */
-.playfield.x>.cell>.mark:not(.x):not(.o):hover::after{
+.playfield.x>.cell>.mark:not(.x):not(.o):hover::after {
   transform: rotate(-45deg);
 }
 
@@ -150,29 +152,29 @@ body{
 .mark.o::after,
 /*HOVER O EFFECT*/
 .playfield.o>.cell>.mark:not(.x):not(.o):hover::before,
-.playfield.o>.cell>.mark:not(.x):not(.o):hover::after{
+.playfield.o>.cell>.mark:not(.x):not(.o):hover::after {
   position: absolute;
-  content: '';
+  content: "";
   border-radius: 50%;
-  width:  var(--mark-size);
+  width: var(--mark-size);
   height: var(--mark-size);
 }
 .mark.o::before,
 /* HOVER O EFFECT */
-.playfield.o>.cell>.mark:not(.x):not(.o):hover::before{
-  width:  calc(var(--mark-size)*.95);
-  height: calc(var(--mark-size)*.95);
+.playfield.o>.cell>.mark:not(.x):not(.o):hover::before {
+  width: calc(var(--mark-size) * 0.95);
+  height: calc(var(--mark-size) * 0.95);
 }
 .mark.o::after,
 /* HOVER O EFFECT */
-.playfield.o>.cell>.mark:not(.x):not(.o):hover::after{
-  width:  calc(var(--mark-size)*.65);
-  height: calc(var(--mark-size)*.65);
+.playfield.o>.cell>.mark:not(.x):not(.o):hover::after {
+  width: calc(var(--mark-size) * 0.65);
+  height: calc(var(--mark-size) * 0.65);
 }
 
 /* Endgame div */
-.endgame{
-  color: white;
+.endgame {
+  color: var(--white);
   font-size: 3rem;
   position: fixed;
   top: 0;
@@ -185,33 +187,35 @@ body{
   align-items: center;
   gap: 5rem;
 }
-.show{
+
+h4 {
+  font-size: 3rem;
+}
+
+.show {
   display: flex;
 }
 
-button{
+button {
   color: black;
-  background-color: white;
+  background-color: var(--white);
   border: 3px solid black;
   font-size: 2rem;
   border-radius: 1rem;
   padding: 2rem 3rem;
   cursor: pointer;
 }
-button:hover{
-  color: white;
+button:hover {
+  color: var(--white);
   background-color: black;
-  border: 3px solid white;
+  border: 3px solid var(--white);
 }
-button:active{
+button:active {
   transform: scale(0.9);
 }
 
-
-
-
-.footer{
-  color: white;
+.footer {
+  color: var(--white);
   background-color: var(--stale-500);
   width: 100%;
   height: 7rem;
@@ -223,7 +227,33 @@ button:active{
   justify-content: center;
   cursor: pointer;
 }
-.footer:hover{
+
+.footer:hover {
   -color: black;
   background-color: var(--slate-400);
+}
+
+.interface {
+}
+.interface-button {
+  font-weight: 800;
+  color: var(--white);
+  background-color: var(--stale-500);
+  border: 3px solid var(--stale-500);
+  box-shadow: var(--outer-shadow);
+  font-size: 2rem;
+  border-radius: 1rem;
+  padding: 1rem 6rem;
+  cursor: pointer;
+}
+.interface-button:hover {
+  color: var(--stale-500);
+  background-color: var(--white);
+  border: 3px solid var(--stale-500);
+}
+.button-active {
+  transform: scale(1.05);
+  color: var(--stale-500);
+  background-color: var(--white);
+  border: 3px solid var(--stale-500);
 }
