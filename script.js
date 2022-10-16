@@ -1,6 +1,6 @@
 const { log } = console;
-const X = mark("x");
-const O = mark("o");
+const X = mark("x", "human");
+const O = mark("o", "computer");
 //------------------------------------------------------------------------
 // MODULE: DISPLAY CONTROLLER
 //------------------------------------------------------------------------
@@ -12,7 +12,15 @@ const displayController = (function () {
   const winningText = document.querySelector(".winning-text");
   const setXButton = document.getElementById("x-button");
   const setOButton = document.getElementById("o-button");
-  function setDefaultMark(){
+
+  function selectEmptyField(row, item) {
+    for (let cell of cells) {
+      if (cell.dataset.cell === `${item}` && cell.dataset.row === `${row}`) {
+        cell.click();
+      }
+    }
+  }
+  function setDefaultMark() {
     setXButton.classList.add("button-active");
     setOButton.classList.remove("button-active");
   }
@@ -34,6 +42,7 @@ const displayController = (function () {
         setOButton.classList.add("button-active");
         setXButton.classList.remove("button-active");
         gameRules.setMarkO();
+        gameRules.randomTurn();
         hoverMark();
         log("Setup O");
       }
@@ -60,37 +69,47 @@ const displayController = (function () {
   function showDrawText() {
     winningText.textContent = `It's a draw!`;
   }
-  //EVENT LISTENERS
   function startHandler(func) {
     const restartButton = document.getElementById("restart-button");
     const restartDiv = document.querySelector(".footer");
     restartDiv.addEventListener("click", func);
     restartButton.addEventListener("click", func);
   }
-
   function resetCells() {
-    cells.forEach((cell) => {
+    for (let cell of cells) {
       cell.addEventListener("click", _handleClick, { once: true });
       cell.classList.remove("puff-in-center");
-    });
+    }
   }
   function deactivateCells() {
-    for (cell of cells) {
+    for (let cell of cells) {
       cell.removeEventListener("click", _handleClick);
     }
+    if(gameRules.checkWin() || gameRules.checkDraw())
     playfield.classList.remove(O.sign, X.sign);
+    log('cells deactivated')
+  }
+  function activateCells(){
+    for(let cell of cells){
+      cell.addEventListener('click',_handleClick)
+    }
   }
   //CLICK HANDLER
   function _handleClick(e) {
     const cell = e.target;
     const currentMark = gameRules.getMark();
     _placeMark(cell, currentMark);
+    deactivateCells()
     gameRules.endGame();
     gameRules.nextRound();
+    setTimeout(() => {
+      activateCells();
+      gameRules.randomTurn();
+    }, 500);
   }
   //CLEAR DISPLAY
   function clearDisplay() {
-    for (cell of cells) {
+    for (let cell of cells) {
       cell.classList.remove(X.sign, O.sign);
     }
   }
@@ -99,15 +118,18 @@ const displayController = (function () {
     playfield.classList.remove(X.sign, O.sign);
     playfield.classList.add(gameRules.getMark());
   }
-
   //internal functions
   function _placeMark(cell, current) {
+    const row = cell.dataset.row;
+    const item = cell.dataset.cell;
     cell.classList.add(current);
     cell.classList.add("puff-in-center");
     displayController.deactivateMarkInterface();
+    gameRules.board[row][item] = current;
   }
   return {
     cells,
+    selectEmptyField,
     hoverMark,
     clearDisplay,
     resetCells,
@@ -119,7 +141,7 @@ const displayController = (function () {
     showDrawText,
     activateMarkInterface,
     deactivateMarkInterface,
-    setDefaultMark
+    setDefaultMark,
   };
 })();
 //------------------------------------------------------------------------
@@ -127,6 +149,11 @@ const displayController = (function () {
 //------------------------------------------------------------------------
 const gameRules = (function () {
   let _mark;
+  const board = [
+    ["", "", ""],
+    ["", "", ""],
+    ["", "", ""],
+  ];
   const winningCombinations = [
     //HORIZONTAL
     [0, 1, 2],
@@ -141,10 +168,34 @@ const gameRules = (function () {
     [2, 4, 6],
   ];
   // GETTERS
+  const getBoard = () => board;
   const getMark = () => _mark;
   // METHODS
-  const setMarkX = () => _mark = X.sign;
-  const setMarkO = () => _mark = O.sign;
+  const clearBoard = () => {
+    for (let i = 0; i < board.length; i++) {
+      for (let j = 0; j < board[i].length; j++) {
+        board[i][j] = "";
+      }
+    }
+  };
+  const randomTurn = () => {
+    if(getMark()===X.sign) return;
+    if(checkDraw()||checkWin()) return;
+    const emptyCells = [];
+    for (let i = 0; i < board.length; i++) {
+      for (let j = 0; j < board[i].length; j++) {
+        if (!board[i][j]) {
+          emptyCells.push([i, j]);
+        }
+      }
+    }
+    const random = Math.floor(Math.random() * (emptyCells.length - 1));
+    const turn = emptyCells[random]
+    log(turn)
+    displayController.selectEmptyField(turn[0], turn[1])
+  };
+  const setMarkX = () => (_mark = X.sign);
+  const setMarkO = () => (_mark = O.sign);
   const gameStarted = () => {
     const cells = [...displayController.cells];
     const started = cells.some(
@@ -154,6 +205,7 @@ const gameRules = (function () {
     return started;
   };
   const startGame = () => {
+    clearBoard();
     displayController.activateMarkInterface();
     setMarkX();
     displayController.setDefaultMark();
@@ -199,16 +251,24 @@ const gameRules = (function () {
     }
   };
   return {
+    board,
+    getBoard,
+    clearBoard,
+    randomTurn,
     getMark,
     startGame,
     nextRound,
     endGame,
+    checkWin,
     checkDraw,
     gameStarted,
     setMarkX,
     setMarkO,
   };
 })();
+//------------------------------------------------------------------------
+// MODULE: ON LOAD
+//------------------------------------------------------------------------
 const onLoad = (function () {
   gameRules.startGame();
   displayController.startHandler(gameRules.startGame);
@@ -216,8 +276,13 @@ const onLoad = (function () {
 //------------------------------------------------------------------------
 // FACTORY: PLAYER
 //------------------------------------------------------------------------
-function mark(sign) {
+function mark(sign, player) {
   const currentMark = {};
   currentMark.sign = sign;
+  currentMark.player = player;
   return currentMark;
+}
+
+function State(old){
+  
 }
