@@ -15,7 +15,7 @@ const displayController = (function () {
   const setXButton = document.getElementById("x-button");
   const setOButton = document.getElementById("o-button");
 
-  const makeDifficulty = (function (){
+  const _makeDifficulty = (function (){
     const diffDiv = document.getElementById('difficulty-div');
     diffDiv.addEventListener('click', function(e){
       const diffMenu = document.querySelector('.difficulty-menu')
@@ -67,7 +67,6 @@ const displayController = (function () {
   function activateMarkInterface() {
     setXButton.disabled = false;
     setOButton.disabled = false;
-    log("Mark interface enabled");
     setXButton.addEventListener("click", function (e) {
       if (!setXButton.classList.contains("button-active")) {
         setXButton.classList.add("button-active");
@@ -94,7 +93,6 @@ const displayController = (function () {
     if (gameRules.isGameStarted()) {
       setXButton.disabled = true;
       setOButton.disabled = true;
-      log("Mark interface disabled");
     }
   }
   function showEndgameMenu() {
@@ -129,7 +127,6 @@ const displayController = (function () {
     }
     if (gameRules.isWin().bool || gameRules.isDraw())
       playfield.classList.remove(computer.sign, player.sign);
-    log("cells deactivated");
   }
   function activateCells() {
     for (let cell of cells) {
@@ -406,7 +403,7 @@ const ai = (function () {
     log(actions)
     if (difficulty === "novice") {
       let action;
-      if (random() * 100 <= 40) {
+      if (random() * 100 <= 35) {
         action = actions[0];
         log('Novice: Bad move')
       } else {
