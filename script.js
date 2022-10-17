@@ -1,6 +1,8 @@
 const { log } = console;
-const X = mark("x", "human");
-const O = mark("o", "computer");
+const { min, max } = Math;
+//------------------------------------------------------------------------
+const player = mark("x", "human");
+const computer = mark("o", "computer");
 //------------------------------------------------------------------------
 // MODULE: DISPLAY CONTROLLER
 //------------------------------------------------------------------------
@@ -13,9 +15,9 @@ const displayController = (function () {
   const setXButton = document.getElementById("x-button");
   const setOButton = document.getElementById("o-button");
 
-  function selectEmptyField(row, item) {
+  function selectEmptyField(item) {
     for (let cell of cells) {
-      if (cell.dataset.cell === `${item}` && cell.dataset.row === `${row}`) {
+      if (cell.dataset.cell === `${item}`) {
         cell.click();
       }
     }
@@ -42,14 +44,15 @@ const displayController = (function () {
         setOButton.classList.add("button-active");
         setXButton.classList.remove("button-active");
         gameRules.setMarkO();
-        gameRules.randomTurn();
+        gameRules.AITurn();
+        //gameRules.randomTurn();
         hoverMark();
         log("Setup O");
       }
     });
   }
   function deactivateMarkInterface() {
-    if (gameRules.gameStarted()) {
+    if (gameRules.isGameStarted()) {
       setXButton.disabled = true;
       setOButton.disabled = true;
       log("Mark interface disabled");
@@ -61,10 +64,10 @@ const displayController = (function () {
   function hideEndgameMenu() {
     endGameField.classList.remove("show");
   }
-  function showWinningText(target) {
-    target === O.sign
-      ? (winningText.textContent = `O wins! Congratulations!`)
-      : (winningText.textContent = `X wins! Congratulations!`);
+  function showWinningText() {
+    winningText.textContent = `${gameRules
+      .isWin()
+      .mark.toUpperCase()} wins! Congratulations!`;
   }
   function showDrawText() {
     winningText.textContent = `It's a draw!`;
@@ -85,47 +88,47 @@ const displayController = (function () {
     for (let cell of cells) {
       cell.removeEventListener("click", _handleClick);
     }
-    if(gameRules.checkWin() || gameRules.checkDraw())
-    playfield.classList.remove(O.sign, X.sign);
-    log('cells deactivated')
+    if (gameRules.isWin().bool || gameRules.isDraw())
+      playfield.classList.remove(computer.sign, player.sign);
+    log("cells deactivated");
   }
-  function activateCells(){
-    for(let cell of cells){
-      cell.addEventListener('click',_handleClick)
+  function activateCells() {
+    for (let cell of cells) {
+      cell.addEventListener("click", _handleClick);
     }
   }
   //CLICK HANDLER
   function _handleClick(e) {
     const cell = e.target;
     const currentMark = gameRules.getMark();
-    _placeMark(cell, currentMark);
-    deactivateCells()
+    _makeTurn(cell, currentMark);
+    deactivateCells();
     gameRules.endGame();
     gameRules.nextRound();
     setTimeout(() => {
       activateCells();
-      gameRules.randomTurn();
+      //gameRules.randomTurn();
+      gameRules.AITurn();
     }, 500);
   }
   //CLEAR DISPLAY
   function clearDisplay() {
     for (let cell of cells) {
-      cell.classList.remove(X.sign, O.sign);
+      cell.classList.remove(player.sign, computer.sign);
     }
   }
   //HOVER HANDLER
   function hoverMark() {
-    playfield.classList.remove(X.sign, O.sign);
+    playfield.classList.remove(player.sign, computer.sign);
     playfield.classList.add(gameRules.getMark());
   }
   //internal functions
-  function _placeMark(cell, current) {
-    const row = cell.dataset.row;
+  function _makeTurn(cell, current) {
     const item = cell.dataset.cell;
+    gameRules.board[item] = current;
     cell.classList.add(current);
     cell.classList.add("puff-in-center");
     displayController.deactivateMarkInterface();
-    gameRules.board[row][item] = current;
   }
   return {
     cells,
@@ -149,60 +152,97 @@ const displayController = (function () {
 //------------------------------------------------------------------------
 const gameRules = (function () {
   let _mark;
-  const board = [
-    ["", "", ""],
-    ["", "", ""],
-    ["", "", ""],
-  ];
-  const winningCombinations = [
-    //HORIZONTAL
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    //VERTICAL
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    //DIAGONAL
-    [0, 4, 8],
-    [2, 4, 6],
-  ];
+  const board = ["", "", "", "", "", "", "", "", ""];
   // GETTERS
   const getBoard = () => board;
   const getMark = () => _mark;
-  // METHODS
+  const setMarkX = () => (_mark = player.sign);
+  const setMarkO = () => (_mark = computer.sign);
+  // GAME
   const clearBoard = () => {
     for (let i = 0; i < board.length; i++) {
-      for (let j = 0; j < board[i].length; j++) {
-        board[i][j] = "";
-      }
+      board[i] = "";
     }
   };
-  const randomTurn = () => {
-    if(getMark()===X.sign) return;
-    if(checkDraw()||checkWin()) return;
-    const emptyCells = [];
+  const emptyCells = () => {
+    const indexes = [];
     for (let i = 0; i < board.length; i++) {
-      for (let j = 0; j < board[i].length; j++) {
-        if (!board[i][j]) {
-          emptyCells.push([i, j]);
+      if (!board[i]) {
+        indexes.push(i);
+      }
+    }
+    return indexes;
+  };
+  const randomTurn = () => {
+    if (getMark() === player.sign) return;
+    if (isDraw() || isWin().bool) return;
+    const empty = emptyCells();
+    const random = Math.floor(Math.random() * (empty.length - 1));
+    const turn = empty[random];
+    displayController.selectEmptyField(turn);
+    log(board);
+  };
+  const AITurn = () => {
+    if (getMark() === player.sign) return;
+    if (isDraw() || isWin().bool) return;
+    let bestScore = -Infinity;
+    let turn;
+    for (let i = 0; i < board.length; i++) {
+      if (board[i] === "") {
+        board[i] = computer.sign;
+        let score = ai.minimax(board, 0, false);
+        board[i] = "";
+        if (score > bestScore) {
+          bestScore = score;
+          turn = i;
+          log({ turn });
         }
       }
     }
-    const random = Math.floor(Math.random() * (emptyCells.length - 1));
-    const turn = emptyCells[random]
-    log(turn)
-    displayController.selectEmptyField(turn[0], turn[1])
+    displayController.selectEmptyField(turn);
   };
-  const setMarkX = () => (_mark = X.sign);
-  const setMarkO = () => (_mark = O.sign);
-  const gameStarted = () => {
-    const cells = [...displayController.cells];
-    const started = cells.some(
-      (cell) =>
-        cell.classList.contains(X.sign) || cell.classList.contains(O.sign)
-    );
-    return started;
+  const isGameStarted = () => {
+    return board.some((item) => item === player.sign || item === computer.sign);
+  };
+  const isWin = () => {
+    const board = getBoard();
+    //Horizontal
+    for (let i = 0; i <= 6; i += 3) {
+      if (
+        board[i] !== "" &&
+        board[i] === board[i + 1] &&
+        board[i + 1] === board[i + 2]
+      ) {
+        const mark = board[i];
+        return { bool: true, mark };
+      }
+    }
+    //Vertical
+    for (let i = 0; i <= 2; i++) {
+      if (
+        board[i] !== "" &&
+        board[i] === board[i + 3] &&
+        board[i + 3] === board[i + 6]
+      ) {
+        const mark = board[i];
+        return { bool: true, mark };
+      }
+    }
+    //Diagonal
+    for (let i = 0, j = 4; i <= 2; i = i + 2, j = j - 2) {
+      if (
+        board[i] !== "" &&
+        board[i] === board[i + j] &&
+        board[i + j] === board[i + 2 * j]
+      ) {
+        const mark = board[i];
+        return { bool: true, mark };
+      }
+    }
+    return { bool: false };
+  };
+  const isDraw = () => {
+    return emptyCells().length === 0 ? true : false;
   };
   const startGame = () => {
     clearBoard();
@@ -215,36 +255,17 @@ const gameRules = (function () {
     displayController.hoverMark();
   };
   const nextRound = () => {
-    if (getMark() === X.sign) {
-      setMarkO();
-    } else {
-      setMarkX();
-    }
+    getMark() === player.sign ? setMarkO() : setMarkX();
     displayController.hoverMark();
   };
-  const checkWin = () => {
-    const currentMark = gameRules.getMark();
-    return winningCombinations.some((combination) => {
-      return combination.every((element) => {
-        return displayController.cells[element].classList.contains(currentMark);
-      });
-    });
-  };
-  const checkDraw = () => {
-    const cells = [...displayController.cells];
-    const draw = cells.every(
-      (element, index) =>
-        element.classList.contains(O.sign) || element.classList.contains(X.sign)
-    );
-    if (!checkWin() && draw) return draw;
-  };
+
   const endGame = () => {
-    if (checkWin()) {
+    if (isWin().bool) {
       log("game ended");
       displayController.deactivateCells();
       displayController.showEndgameMenu();
-      displayController.showWinningText(getMark());
-    } else if (checkDraw()) {
+      displayController.showWinningText();
+    } else if (isDraw()) {
       displayController.deactivateCells();
       displayController.showEndgameMenu();
       displayController.showDrawText();
@@ -254,14 +275,14 @@ const gameRules = (function () {
     board,
     getBoard,
     clearBoard,
-    randomTurn,
+    AITurn,
     getMark,
     startGame,
     nextRound,
     endGame,
-    checkWin,
-    checkDraw,
-    gameStarted,
+    isWin,
+    isDraw,
+    isGameStarted,
     setMarkX,
     setMarkO,
   };
@@ -282,7 +303,51 @@ function mark(sign, player) {
   currentMark.player = player;
   return currentMark;
 }
-
-function State(old){
-  
-}
+//------------------------------------------------------------------------
+// AI
+//------------------------------------------------------------------------
+const ai = (function () {
+  let AIMovesCount;
+  let scores = {
+    o: 10,
+    x: -10,
+    draw: 0,
+  };
+  const isWin = function () {
+    return gameRules.isWin().bool
+      ? gameRules.isWin().mark
+      : gameRules.isDraw()
+      ? "draw"
+      : false;
+  }
+  const minimax = (board, depth, isMax) => {
+    const result = isWin();
+    if (result) {
+      return scores[result];
+    }
+    if (isMax) {
+      let bestScore = -Infinity;
+      for (let i = 0; i < board.length; i++) {
+        if (board[i] === "") {
+          board[i] = computer.sign;
+          let score = minimax(board, depth + 1, false);
+          board[i] = "";
+          bestScore = max(score, bestScore)
+        }
+      }
+      return bestScore;
+    } else {
+      let bestScore = Infinity;
+      for (let i = 0; i < board.length; i++) {
+        if (board[i] === "") {
+          board[i] = player.sign;
+          let score = minimax(board, depth + 1, true);
+          board[i] = "";
+          bestScore = min(score, bestScore);
+        }
+      }
+      return bestScore;
+    }
+  };
+  return { minimax };
+})();
