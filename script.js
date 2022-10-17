@@ -1,5 +1,5 @@
 const { log } = console;
-const { min, max } = Math;
+const { min, max, floor, random } = Math;
 //------------------------------------------------------------------------
 const player = mark("x", "human");
 const computer = mark("o", "computer");
@@ -15,6 +15,44 @@ const displayController = (function () {
   const setXButton = document.getElementById("x-button");
   const setOButton = document.getElementById("o-button");
 
+  const makeDifficulty = (function (){
+    const diffDiv = document.getElementById('difficulty-div');
+    diffDiv.addEventListener('click', function(e){
+      const diffMenu = document.querySelector('.difficulty-menu')
+      const closeDiffBtn = document.querySelector('.close');
+      closeDiffBtn.addEventListener('click',function(){
+        if(diffMenu.classList.contains('show')){
+          diffMenu.classList.remove('show');
+        }
+      })
+      if(!diffMenu.classList.contains('show')){
+        diffMenu.classList.add('show')
+      }else{
+        diffMenu.classList.remove('show')
+      }
+      const buttonNovice = document.querySelector('#novice')
+      const buttonMaster = document.querySelector('#master')
+      if(ai.getDifficulty() === 'master'){
+        buttonMaster.classList.add('active');
+      }else{
+        buttonNovice.classList.add('active');
+      }
+      buttonNovice.addEventListener('click', function(e){
+        if(!buttonNovice.classList.contains('active')){
+          buttonNovice.classList.add('active')
+          buttonMaster.classList.remove('active')
+          ai.setDifficulty('novice');
+        }
+      })
+      buttonMaster.addEventListener('click', function(e){
+        if(!buttonMaster.classList.contains('active')){
+          buttonMaster.classList.add('active')
+          buttonNovice.classList.remove('active')
+          ai.setDifficulty('master');
+        }
+      })
+    })
+  })()
   function selectEmptyField(item) {
     for (let cell of cells) {
       if (cell.dataset.cell === `${item}`) {
@@ -44,8 +82,9 @@ const displayController = (function () {
         setOButton.classList.add("button-active");
         setXButton.classList.remove("button-active");
         gameRules.setMarkO();
-        gameRules.AITurn();
+        //gameRules.AITurn();
         //gameRules.randomTurn();
+        ai.AImakeMove();
         hoverMark();
         log("Setup O");
       }
@@ -74,7 +113,7 @@ const displayController = (function () {
   }
   function startHandler(func) {
     const restartButton = document.getElementById("restart-button");
-    const restartDiv = document.querySelector(".footer");
+    const restartDiv = document.querySelector("#restart-div");
     restartDiv.addEventListener("click", func);
     restartButton.addEventListener("click", func);
   }
@@ -108,7 +147,8 @@ const displayController = (function () {
     setTimeout(() => {
       activateCells();
       //gameRules.randomTurn();
-      gameRules.AITurn();
+      //gameRules.AITurn();
+      ai.AImakeMove();
     }, 500);
   }
   //CLEAR DISPLAY
@@ -187,6 +227,7 @@ const gameRules = (function () {
     if (isDraw() || isWin().bool) return;
     let bestScore = -Infinity;
     let turn;
+    const moves = [];
     for (let i = 0; i < board.length; i++) {
       if (board[i] === "") {
         board[i] = computer.sign;
@@ -194,13 +235,13 @@ const gameRules = (function () {
         board[i] = "";
         if (score > bestScore) {
           bestScore = score;
-          turn = i;
-          log({ turn });
+          moves.push(i);
         }
       }
     }
-    displayController.selectEmptyField(turn);
+    return moves;
   };
+
   const isGameStarted = () => {
     return board.some((item) => item === player.sign || item === computer.sign);
   };
@@ -308,18 +349,27 @@ function mark(sign, player) {
 //------------------------------------------------------------------------
 const ai = (function () {
   let AIMovesCount;
-  let scores = {
+  let difficulty = 'master';
+  const scores = {
     o: 10,
     x: -10,
     draw: 0,
   };
+  const getDifficulty = function(){
+    log(difficulty)
+    return difficulty; 
+  }
+  const setDifficulty = function(diff){
+    difficulty = diff;
+    log(difficulty);
+  }
   const isWin = function () {
     return gameRules.isWin().bool
       ? gameRules.isWin().mark
       : gameRules.isDraw()
       ? "draw"
       : false;
-  }
+  };
   const minimax = (board, depth, isMax) => {
     const result = isWin();
     if (result) {
@@ -332,7 +382,7 @@ const ai = (function () {
           board[i] = computer.sign;
           let score = minimax(board, depth + 1, false);
           board[i] = "";
-          bestScore = max(score, bestScore)
+          bestScore = max(score, bestScore);
         }
       }
       return bestScore;
@@ -349,5 +399,27 @@ const ai = (function () {
       return bestScore;
     }
   };
-  return { minimax };
+  const AImakeMove = () => {
+    if (gameRules.getMark() === player.sign) return;
+    if (isWin()) return;
+    const actions = gameRules.AITurn();
+    log(actions)
+    if (difficulty === "novice") {
+      let action;
+      if (random() * 100 <= 40) {
+        action = actions[0];
+        log('Novice: Bad move')
+      } else {
+        actions.length >= 2 ? (action = actions[1]) : (action = actions[0]);
+        log('Novice: Best move')
+      }
+      displayController.selectEmptyField(action);
+    }
+    if (difficulty === "master") {
+      const action = actions[actions.length - 1];
+      displayController.selectEmptyField(action);
+      log('Master: Move')
+    }
+  };
+  return { minimax, AImakeMove, setDifficulty, getDifficulty };
 })();

@@ -192,7 +192,7 @@ h4 {
   font-size: 3rem;
 }
 
-.show {
+div.show {
   display: flex;
 }
 
@@ -225,11 +225,32 @@ button:active {
   font-size: 2rem;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
 }
 
 .footer:hover {
-  -color: black;
+}
+
+.restart,
+.difficulty {
+  width: 50%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.restart {
+  border-bottom-left-radius: 0.7rem;
+  border-right: 0.5px solid var(--slate-400);
+  cursor: pointer;
+}
+.difficulty {
+  border-bottom-right-radius: 0.7rem;
+  border-left: 0.5px solid var(--slate-400);
+  cursor: pointer;
+}
+.restart:hover,
+.difficulty:hover {
   background-color: var(--slate-400);
 }
 
@@ -256,4 +277,37 @@ button:active {
   color: var(--stale-500);
   background-color: var(--white);
   border: 3px solid var(--stale-500);
+}
+
+.difficulty-menu {
+  color: var(--white);
+  font-size: 1.5rem;
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%);
+  width: max(75rem, 55vw);
+  height: max(22rem, 30vh);
+  background-color: #64748bdc;
+  border-radius: 1rem;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5rem;
+}
+
+.active{
+  transform: scale(1.05);
+  color: var(--white);
+  background-color: black;
+  border: 3px solid var(--white);
+}
+
+button.close{
+position: absolute;
+padding: 1rem;
+margin: 2rem;
+right: 0;
+top: 0;
 }
