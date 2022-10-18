@@ -219,26 +219,7 @@ const gameRules = (function () {
     displayController.selectEmptyField(turn);
     log(board);
   };
-  const AITurn = () => {
-    if (getMark() === player.sign) return;
-    if (isDraw() || isWin().bool) return;
-    let bestScore = -Infinity;
-    let turn;
-    const moves = [];
-    for (let i = 0; i < board.length; i++) {
-      if (board[i] === "") {
-        board[i] = computer.sign;
-        let score = ai.minimax(board, 0, false);
-        board[i] = "";
-        if (score > bestScore) {
-          bestScore = score;
-          moves.push(i);
-        }
-      }
-    }
-    return moves;
-  };
-
+  
   const isGameStarted = () => {
     return board.some((item) => item === player.sign || item === computer.sign);
   };
@@ -291,6 +272,7 @@ const gameRules = (function () {
     displayController.resetCells();
     displayController.clearDisplay();
     displayController.hoverMark();
+    log('Game: Started')
   };
   const nextRound = () => {
     getMark() === player.sign ? setMarkO() : setMarkX();
@@ -299,11 +281,12 @@ const gameRules = (function () {
 
   const endGame = () => {
     if (isWin().bool) {
-      log("game ended");
+      log("Game: Ended");
       displayController.deactivateCells();
       displayController.showEndgameMenu();
       displayController.showWinningText();
     } else if (isDraw()) {
+      log("Game: Ended");
       displayController.deactivateCells();
       displayController.showEndgameMenu();
       displayController.showDrawText();
@@ -313,7 +296,6 @@ const gameRules = (function () {
     board,
     getBoard,
     clearBoard,
-    AITurn,
     getMark,
     startGame,
     nextRound,
@@ -326,13 +308,6 @@ const gameRules = (function () {
   };
 })();
 //------------------------------------------------------------------------
-// MODULE: ON LOAD
-//------------------------------------------------------------------------
-const onLoad = (function () {
-  gameRules.startGame();
-  displayController.startHandler(gameRules.startGame);
-})();
-//------------------------------------------------------------------------
 // FACTORY: PLAYER
 //------------------------------------------------------------------------
 function mark(sign, player) {
@@ -342,7 +317,7 @@ function mark(sign, player) {
   return currentMark;
 }
 //------------------------------------------------------------------------
-// AI
+// MODULE: AI
 //------------------------------------------------------------------------
 const ai = (function () {
   let AIMovesCount;
@@ -367,7 +342,7 @@ const ai = (function () {
       ? "draw"
       : false;
   };
-  const minimax = (board, depth, isMax) => {
+  const _minimax = (board, depth, isMax) => {
     const result = isWin();
     if (result) {
       return scores[result];
@@ -377,7 +352,7 @@ const ai = (function () {
       for (let i = 0; i < board.length; i++) {
         if (board[i] === "") {
           board[i] = computer.sign;
-          let score = minimax(board, depth + 1, false);
+          let score = _minimax(board, depth + 1, false);
           board[i] = "";
           bestScore = max(score, bestScore);
         }
@@ -388,7 +363,7 @@ const ai = (function () {
       for (let i = 0; i < board.length; i++) {
         if (board[i] === "") {
           board[i] = player.sign;
-          let score = minimax(board, depth + 1, true);
+          let score = _minimax(board, depth + 1, true);
           board[i] = "";
           bestScore = min(score, bestScore);
         }
@@ -396,14 +371,34 @@ const ai = (function () {
       return bestScore;
     }
   };
+  const _AITurn = () => {
+    if (gameRules.getMark() === player.sign) return;
+    if (gameRules.isDraw() || gameRules.isWin().bool) return;
+    const board = gameRules.board;
+    let bestScore = -Infinity;
+    const moves = [];
+    for (let i = 0; i < board.length; i++) {
+      if (board[i] === "") {
+        board[i] = computer.sign;
+        let score = _minimax(board, 0, false);
+        board[i] = "";
+        if (score > bestScore) {
+          bestScore = score;
+          moves.push(i);
+        }
+      }
+    }
+    return moves;
+  };
+
   const AImakeMove = () => {
     if (gameRules.getMark() === player.sign) return;
     if (isWin()) return;
-    const actions = gameRules.AITurn();
+    const actions = _AITurn();
     log(actions)
     if (difficulty === "novice") {
       let action;
-      if (random() * 100 <= 35) {
+      if (random() * 100 <= 20) {
         action = actions[0];
         log('Novice: Bad move')
       } else {
@@ -415,8 +410,15 @@ const ai = (function () {
     if (difficulty === "master") {
       const action = actions[actions.length - 1];
       displayController.selectEmptyField(action);
-      log('Master: Move')
+      log('Master: Best move')
     }
   };
-  return { minimax, AImakeMove, setDifficulty, getDifficulty };
+  return {AImakeMove, setDifficulty, getDifficulty };
+})();
+//------------------------------------------------------------------------
+// MODULE: ON LOAD
+//------------------------------------------------------------------------
+const onLoad = (function () {
+  gameRules.startGame();
+  displayController.startHandler(gameRules.startGame);
 })();
