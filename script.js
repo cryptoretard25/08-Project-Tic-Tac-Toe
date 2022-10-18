@@ -81,15 +81,13 @@ const displayController = (function () {
         setOButton.classList.add("button-active");
         setXButton.classList.remove("button-active");
         gameRules.setMarkO();
-        //gameRules.AITurn();
-        //gameRules.randomTurn();
         ai.AImakeMove();
         hoverMark();
         log("Setup O");
       }
     });
   }
-  function deactivateMarkInterface() {
+  function _deactivateMarkInterface() {
     if (gameRules.isGameStarted()) {
       setXButton.disabled = true;
       setOButton.disabled = true;
@@ -165,23 +163,22 @@ const displayController = (function () {
     gameRules.board[item] = current;
     cell.classList.add(current);
     cell.classList.add("puff-in-center");
-    displayController.deactivateMarkInterface();
+    _deactivateMarkInterface();
   }
   return {
     cells,
-    selectEmptyField,
-    hoverMark,
-    clearDisplay,
-    resetCells,
-    deactivateCells,
-    showEndgameMenu,
-    startHandler,
-    hideEndgameMenu,
-    showWinningText,
-    showDrawText,
-    activateMarkInterface,
-    deactivateMarkInterface,
-    setDefaultMark,
+    selectEmptyField, // +
+    hoverMark, // +
+    clearDisplay, //+
+    resetCells, // +
+    deactivateCells, // +
+    showEndgameMenu, // +
+    startHandler, // +
+    hideEndgameMenu, // +
+    showWinningText, // +
+    showDrawText, // +
+    activateMarkInterface, // +
+    setDefaultMark, // +
   };
 })();
 //------------------------------------------------------------------------
@@ -374,7 +371,7 @@ const ai = (function () {
   const _AITurn = () => {
     if (gameRules.getMark() === player.sign) return;
     if (gameRules.isDraw() || gameRules.isWin().bool) return;
-    const board = gameRules.board;
+    const board = gameRules.getBoard();
     let bestScore = -Infinity;
     const moves = [];
     for (let i = 0; i < board.length; i++) {
