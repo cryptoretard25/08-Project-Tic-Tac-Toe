@@ -1,5 +1,205 @@
 const { log } = console;
 const { min, max, floor, random } = Math;
+// OOP refactoring
+//------------------------------------------------------------------------
+//------------------------------------------------------------------------
+// class Player {
+//   constructor(mark, human) {
+//     this.mark = mark;
+//     this.type = type;
+//   }
+//   chooseMark(value) {
+//     this.mark = value;
+//     return this.mark;
+//   }
+// }
+
+// const field = (function () {
+//   const board = ["", "", "", "", "", "", "", "", ""];
+//   const clearBoard = () => {
+//     for (let i = 0; i < board.length; i++) {
+//       board[i] = "";
+//     }
+//   };
+//   function emptyCells() {
+//     const indexes = [];
+//     for (let i = 0; i < board.length; i++) {
+//       if (!board[i]) {
+//         indexes.push(i);
+//       }
+//     }
+//     return indexes;
+//   }
+//   function combinations() {
+//     // Horizontal
+//     for (let i = 0; i <= 6; i += 3) {
+//       if (
+//         board[i] !== "" &&
+//         board[i] === board[i + 1] &&
+//         board[i + 1] === board[i + 2]
+//       ) {
+//         return board[i];
+//       }
+//     }
+//     // Vertical
+//     for (let i = 0; i <= 2; i++) {
+//       if (
+//         board[i] !== "" &&
+//         board[i] === board[i + 3] &&
+//         board[i + 3] === board[i + 6]
+//       ) {
+//         return board[i];
+//       }
+//     }
+//     // Diagonal
+//     for (let i = 0, j = 4; i <= 2; i = i + 2, j = j - 2) {
+//       if (
+//         board[i] !== "" &&
+//         board[i] === board[i + j] &&
+//         board[i + j] === board[i + 2 * j]
+//       ) {
+//         return board[i];
+//       }
+//     }
+//     if (emptyCells().length === 0) {
+//       return false;
+//     } else {
+//       return;
+//     }
+//   }
+
+//   return { combinations, clearBoard, emptyCells, board };
+// })();
+
+// const enemyAIlogic = (function () {
+//   function scores(mark, winPositions) {
+//     if (winPositions === undefined) return;
+//     if (!winPositions) return 0;
+//     if (winPositions && winPositions === mark) {
+//       return 10;
+//     } else {
+//       return -10;
+//     }
+//   }
+
+//   function minimax(board, depth, isMax, computer, human, winPos) {
+//     if (scores(computer, winPos)) {
+//       return scores(computer, winPos);
+//     }
+//     if (isMax) {
+//       let bestScore = -Infinity;
+//       for (let i = 0; i < board.length; i++) {
+//         if (board[i] === "") {
+//           board[i] = computer;
+//           let score = minimax(board, depth + 1, false, computer, human, winPos);
+//           board[i] = "";
+//           bestScore = max(score, bestScore);
+//         }
+//       }
+//       return bestScore;
+//     } else {
+//       let bestScore = Infinity;
+//       for (let i = 0; i < board.length; i++) {
+//         if (board[i] === "") {
+//           board[i] = human;
+//           let score = minimax(board, depth + 1, true, computer, human, winPos);
+//           board[i] = "";
+//           bestScore = min(score, bestScore);
+//         }
+//       }
+//       return bestScore;
+//     }
+//   }
+
+//   function move(currentMark, aiMark, humanMark, combinations, board) {
+//     if (currentMark === aiMark) return;
+//     if (combinations !== undefined) return;
+//     let bestScore = -Infinity;
+//     const moves = [];
+//     if (board[i] === "") {
+//       board[i] = computer.sign;
+//       let score = minimax(board, 0, false, aiMark, humanMark);
+//       board[i] = "";
+//       if (score > bestScore) {
+//         bestScore = score;
+//         moves.push(i);
+//       }
+//     }
+//     return moves;
+//   }
+//   return { move };
+// })();
+
+// const enemyAIDifficulty = (function () {
+//   const difficulty = ["novice", "master"];
+//   let difficultyLevel;
+
+//   function setNoviceLevel() {
+//     difficultyLevel = difficulty[0];
+//   }
+
+//   function setMasterLevel() {
+//     difficultyLevel = difficulty[1];
+//   }
+
+//   function AImoveUsingDiff() {
+//     if (enemyAIlogic.move(/*PARAMS*/) === undefined) return;
+//     const actions = enemyAIlogic.move(/*PARAMS*/);
+//     log(actions);
+//     if (difficultyLevel === difficulty[0]) {
+//       let action = actions[0];
+//       log("Novice: Bad move");
+//       if (random() * 100 <= 20) {
+//         action = actions[0];
+//         log("Novice: Bad move");
+//       } else {
+//         actions.length >= 2 ? (action = actions[1]) : (action = actions[0]);
+//         log("Novice: Best move");
+//       }
+//       return action;
+//     } else if (difficultyLevel === difficulty[1]) {
+//       const action = actions[actions.length - 1];
+//       log("Master: Best move");
+//       return action;
+//     }
+//   }
+//   return { setNoviceLevel, setMasterLevel, AImoveUsingDiff };
+// })();
+
+// const game = (function () {
+//   const state = ["none", "started", "win", "draw"];
+//   let currentTurn;
+//   let currentState = state[0];
+
+//   function start() {
+//     currentTurn = 'x';
+//     currentState = state[1];
+//   }
+
+//   function next(player1, player2) {
+//     if (currentState === state[1]) {
+//       currentTurn === player1
+//         ? (currentTurn = player2)
+//         : (currentTurn = player1);
+//       return currentTurn;
+//     }
+//   }
+
+//   function end(player1, player2) {
+//     if (combinations() === player1 || combinations() === player2)
+//       currentState = state[2];
+//     if (combinations() === false) currentState = state[3];
+//     else return;
+//   }
+
+//   function turn(){
+    
+//   }
+// })();
+
+//------------------------------------------------------------------------
+//------------------------------------------------------------------------
+
 //------------------------------------------------------------------------
 const player = mark("x", "human");
 const computer = mark("o", "computer");
@@ -15,44 +215,44 @@ const displayController = (function () {
   const setXButton = document.getElementById("x-button");
   const setOButton = document.getElementById("o-button");
 
-  const _makeDifficulty = (function (){
-    const diffDiv = document.getElementById('difficulty-div');
-    diffDiv.addEventListener('click', function(e){
-      const diffMenu = document.querySelector('.difficulty-menu')
-      const closeDiffBtn = document.querySelector('.close');
-      closeDiffBtn.addEventListener('click',function(){
-        if(diffMenu.classList.contains('show')){
-          diffMenu.classList.remove('show');
+  const _makeDifficulty = (function () {
+    const diffDiv = document.getElementById("difficulty-div");
+    diffDiv.addEventListener("click", function (e) {
+      const diffMenu = document.querySelector(".difficulty-menu");
+      const closeDiffBtn = document.querySelector(".close");
+      closeDiffBtn.addEventListener("click", function () {
+        if (diffMenu.classList.contains("show")) {
+          diffMenu.classList.remove("show");
         }
-      })
-      if(!diffMenu.classList.contains('show')){
-        diffMenu.classList.add('show')
-      }else{
-        diffMenu.classList.remove('show')
+      });
+      if (!diffMenu.classList.contains("show")) {
+        diffMenu.classList.add("show");
+      } else {
+        diffMenu.classList.remove("show");
       }
-      const buttonNovice = document.querySelector('#novice')
-      const buttonMaster = document.querySelector('#master')
-      if(ai.getDifficulty() === 'master'){
-        buttonMaster.classList.add('active');
-      }else{
-        buttonNovice.classList.add('active');
+      const buttonNovice = document.querySelector("#novice");
+      const buttonMaster = document.querySelector("#master");
+      if (ai.getDifficulty() === "master") {
+        buttonMaster.classList.add("active");
+      } else {
+        buttonNovice.classList.add("active");
       }
-      buttonNovice.addEventListener('click', function(e){
-        if(!buttonNovice.classList.contains('active')){
-          buttonNovice.classList.add('active')
-          buttonMaster.classList.remove('active')
-          ai.setDifficulty('novice');
+      buttonNovice.addEventListener("click", function (e) {
+        if (!buttonNovice.classList.contains("active")) {
+          buttonNovice.classList.add("active");
+          buttonMaster.classList.remove("active");
+          ai.setDifficulty("novice");
         }
-      })
-      buttonMaster.addEventListener('click', function(e){
-        if(!buttonMaster.classList.contains('active')){
-          buttonMaster.classList.add('active')
-          buttonNovice.classList.remove('active')
-          ai.setDifficulty('master');
+      });
+      buttonMaster.addEventListener("click", function (e) {
+        if (!buttonMaster.classList.contains("active")) {
+          buttonMaster.classList.add("active");
+          buttonNovice.classList.remove("active");
+          ai.setDifficulty("master");
         }
-      })
-    })
-  })()
+      });
+    });
+  })();
   function selectEmptyField(item) {
     for (let cell of cells) {
       if (cell.dataset.cell === `${item}`) {
@@ -216,7 +416,7 @@ const gameRules = (function () {
     displayController.selectEmptyField(turn);
     log(board);
   };
-  
+
   const isGameStarted = () => {
     return board.some((item) => item === player.sign || item === computer.sign);
   };
@@ -269,7 +469,7 @@ const gameRules = (function () {
     displayController.resetCells();
     displayController.clearDisplay();
     displayController.hoverMark();
-    log('Game: Started')
+    log("Game: Started");
   };
   const nextRound = () => {
     getMark() === player.sign ? setMarkO() : setMarkX();
@@ -318,20 +518,20 @@ function mark(sign, player) {
 //------------------------------------------------------------------------
 const ai = (function () {
   let AIMovesCount;
-  let difficulty = 'master';
+  let difficulty = "master";
   const scores = {
     o: 10,
     x: -10,
     draw: 0,
   };
-  const getDifficulty = function(){
-    log(difficulty)
-    return difficulty; 
-  }
-  const setDifficulty = function(diff){
+  const getDifficulty = function () {
+    log(difficulty);
+    return difficulty;
+  };
+  const setDifficulty = function (diff) {
     difficulty = diff;
     log(difficulty);
-  }
+  };
   const isWin = function () {
     return gameRules.isWin().bool
       ? gameRules.isWin().mark
@@ -392,25 +592,25 @@ const ai = (function () {
     if (gameRules.getMark() === player.sign) return;
     if (isWin()) return;
     const actions = _AITurn();
-    log(actions)
+    log(actions);
     if (difficulty === "novice") {
       let action;
       if (random() * 100 <= 20) {
         action = actions[0];
-        log('Novice: Bad move')
+        log("Novice: Bad move");
       } else {
         actions.length >= 2 ? (action = actions[1]) : (action = actions[0]);
-        log('Novice: Best move')
+        log("Novice: Best move");
       }
       displayController.selectEmptyField(action);
     }
     if (difficulty === "master") {
       const action = actions[actions.length - 1];
       displayController.selectEmptyField(action);
-      log('Master: Best move')
+      log("Master: Best move");
     }
   };
-  return {AImakeMove, setDifficulty, getDifficulty };
+  return { AImakeMove, setDifficulty, getDifficulty };
 })();
 //------------------------------------------------------------------------
 // MODULE: ON LOAD
