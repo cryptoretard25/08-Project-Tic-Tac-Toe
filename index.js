@@ -82,10 +82,11 @@ class AI extends Player {
     }
     return moves;
   }
+
   aiMove(){
     if(this.turn() === undefined) return;
     const actions = this.turn();
-    log(actions);
+    //log(actions);
     if(this.difficulty ==='novice'){
       let action;
       if(random()*100<=20){
@@ -98,10 +99,15 @@ class AI extends Player {
       return action;
     }else if(this.difficulty === 'master'){
       let action = actions[actions.length - 1];
-      log(actions.length-1)
-      log('Master: Best move');
+      //log(actions.length-1)
+      //log('Master: Best move');
       return action;
     }
+  }
+}
+
+class DOMField{
+  constructor(){
   }
 }
 
@@ -180,16 +186,16 @@ const gameState = (function () {
     if (currentState !== state[0]) return;
     setCurrentTurn(player);
     setCurrentState(state[1]);
-    if (getCurrentTurn()===computer){
-      aiTurn();
+    if (getCurrentTurn().human === false){
+      return turn();
     }
     }
 
-  function reset(){
+  function reset(element = field){
     setEndgame();
     setCurrentTurn();
     setCurrentState();
-    field.clearBoard();
+    element.clearBoard();
   }
 
   function next(player1 = human, player2 = computer) {
@@ -211,64 +217,66 @@ const gameState = (function () {
     } else return;
   }
 
-  function playerTurn(cell, board = field.board) {
+  function turn(cell, board = field.board) {
     const player = getCurrentTurn();
     const state = getCurrentState();
-    if (end()) return;
-    if (state !== "started") return;
-    if (player !== human) return;
-    if (board[cell] !== "") return;
-    board[cell] = player.mark;
-    next();
-  }
-  function aiTurn(board = field.board) {
-    const state = getCurrentState();
-    const player = getCurrentTurn();
-    if (end()) return;
-    if (state !== "started") return;
-    if (player !== computer) return;
-    board[computer.aiMove()] = player.mark;
-    next();
+    if (state !== "started") return 'Game is not started yet';
+    if (player.human){
+      if(board[cell] !=='') return 'Cell is not empty'
+      board[cell] = player.mark;
+      next();
+      return cell;
+    }else if(!player.human){
+      const cell = player.aiMove();
+      board[cell] = player.mark;
+      next();
+      return cell;
+    }
   }
   return {
     start,
     reset,
     end,
-    aiTurn,
-    playerTurn,
+    turn,
     getCurrentState,
     getCurrentTurn,
     getEndgame,
   };
 })();
 
-function move(cell){
-  if(gameState.end()) return;
-  gameState.playerTurn(cell);
-  gameState.aiTurn();
-  if(gameState.end()) log(gameState.getEndgame());
+
+
+function move(cell) {
+  if (!gameState.end()) {
+    for (let i = 0; i < 2; i++) {
+    log(gameState.turn(cell));
+    }
+  } else {
+    return 'game ended'
+  }
 }
+const human = new Player('x', true);
+const computer = new AI('o', false);
 
-const human = new Player("x", true);
-const computer = new AI("o", false);
 
-gameState.start(human);
+log(gameState.start(computer));
 move(0)
-move(1)
 move(6)
 move(5)
-move(8)
+move(2)
+if(gameState.end()){log(gameState.getEndgame())}
+//move(8)
 log(field.board)
-log(gameState.getCurrentTurn())
-gameState.reset();
-gameState.start(computer)
-move(1); //x
-move(6);
-move(8);
-
-log(field.board)
+//log(gameState.getCurrentTurn())
+// gameState.reset();
+// gameState.start(computer)
+// move(1); //x
+// move(6);
+// move(8);
+// log(field.board)
 // gameState.reset();
 // gameState.start();
+
 
 // gameFlow.firstMove(5); //x
 // gameFlow.firstMove(7); //x
